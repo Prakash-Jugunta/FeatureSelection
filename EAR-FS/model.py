@@ -1,6 +1,6 @@
 import torch.nn as nn
 import torch
-
+import logging
 
 class FeatureSelectionMLP(nn.Module):
     def __init__(self, n_features) -> None:

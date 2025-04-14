@@ -18,11 +18,18 @@ from model import add_more_features
 from model import add_one_features
 from model import log
 import warnings
+import os
+
+def ensure_dir(directory):
+    os.makedirs(directory, exist_ok=True)  # Creates the directory if it doesn't exist
 
 warnings.filterwarnings("ignore")
-clfl = [KNeighborsClassifier(n_neighbors=3), svm.LinearSVC(dual=False), DecisionTreeClassifier(random_state=42),
-        RandomForestClassifier(random_state=0)]
-path = "dataset.csv"
+clfl = [KNeighborsClassifier(n_neighbors=3), svm.LinearSVC(dual=False), 
+        DecisionTreeClassifier(random_state=42), RandomForestClassifier(random_state=0)]
+
+l = ["knn", "svm", "decision_tree", "random_forest"]  # Define classifier names
+
+path = "DCT_mal.csv"
 lr = 0.01
 device = torch.device('cuda:0')
 epoch = 200
@@ -41,7 +48,8 @@ def setup_seed(seed):
 # data = pd.read_csv(path, header=None)
 # d = data.iloc[1:, :]
 # data = np.array(d)
-data = np.loadtxt(path)
+data = np.loadtxt(path, delimiter=",", skiprows=1)
+
 data, label = data[:, :-1], data[:, -1]  # 默认最后一列为label
 (a, n_feature) = data.shape
 min_max_scaler = MinMaxScaler()
@@ -69,7 +77,8 @@ validation_loader = Data.DataLoader(valid_sampler, batch_size=batch_size,
 logpath = './log.txt'
 logger = log(logpath)
 
-# rd = []
+rd = [42, 123, 7, 99, 56, 77, 88, 23, 15, 63, 101, 31, 90, 5, 28, 75, 18, 48, 200, 69, 81, 3, 111, 222, 144, 6, 36, 97, 55, 19]  # Example random seeds
+
 for random_seed in rd:  # rd is 30 random numbers type list []
     setup_seed(random_seed)
     model = Model(n_feature, int(num_label)).to(device)
@@ -158,9 +167,16 @@ for random_seed in rd:  # rd is 30 random numbers type list []
                    borderaxespad=0,
                    shadow=False,
                    fancybox=True)
-        plt.savefig(f'./{str(random_seed)}/png/{name}_subset_prop.png')
-        plt.show()
-        np.save(f'./{str(random_seed)}/prop/{name}y.npy', np.array(y))  # subg_1的精度
+         
+        save_dir_png = f'./{str(random_seed)}/png/'
+        ensure_dir(save_dir_png)  # Ensure directory exists
+        plt.savefig(f'{save_dir_png}{name}_subset_prop.png')
+
+        
+        save_dir_prop = f'./{str(random_seed)}/prop/'
+        ensure_dir(save_dir_prop)  # Ensure directory exists
+        np.save(f'{save_dir_prop}{name}y.npy', np.array(y))
+        # subg_1的精度
         low = features if features > 1 else 2
         high = low + 50
         if high > n_feature:
@@ -207,7 +223,15 @@ for random_seed in rd:  # rd is 30 random numbers type list []
                    borderaxespad=0,
                    shadow=False,
                    fancybox=True)
-        plt.savefig(f'./{str(random_seed)}/png/{name}subset.png')
-        plt.show()
-        np.save(f'./{str(random_seed)}/y/{name}y.npy', np.array(y))  # subg_2的精度
-    np.save(f'./{str(random_seed)}/record.npy', record)
+        save_dir_png = f'./{str(random_seed)}/png/'
+        ensure_dir(save_dir_png)  # Ensure directory exists
+        plt.savefig(f'{save_dir_png}{name}subset.png')        
+        
+        save_dir_y = f'./{str(random_seed)}/y/'
+        ensure_dir(save_dir_y)  # Ensure directory exists
+        np.save(f'{save_dir_y}{name}y.npy', np.array(y))
+  # subg_2的精度
+    save_dir_record = f'./{str(random_seed)}/'
+    ensure_dir(save_dir_record)  # Ensure directory exists
+    np.save(f'{save_dir_record}record.npy', record)
+
