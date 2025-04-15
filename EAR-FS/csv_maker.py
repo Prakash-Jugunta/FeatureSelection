@@ -1,4 +1,4 @@
 import pandas as pd
-data=pd.read_excel('dataset02.xlsx')
+data=pd.read_excel('data.xlsx')
 print(data.columns)
-data.to_csv('data.csv')
+data.to_csv('data03.csv')
