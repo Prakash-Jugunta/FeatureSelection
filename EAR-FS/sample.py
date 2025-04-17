@@ -25,7 +25,7 @@ clfl = [
 ]
 l = ["knn", "svm", "decision_tree", "random_forest"]
 
-path = "dataset.csv"  # Update to your dataset path
+path = "data03.csv"  # Update to your dataset path
 lr = 0.01
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 epoch = 200
@@ -118,7 +118,9 @@ for random_seed in rd:
         count += 1
         name = l[count]
         options = {'c1': pso_c1, 'c2': pso_c2, 'w': pso_w}
-        init_pos = (select_rate[0].numpy() > 0.5).astype(float) + np.random.rand(n_feature) * 0.1
+        init_pos = (select_rate[0].detach().numpy() > 0.5).astype(float)
+        init_pos += np.random.rand(n_feature) * 0.1
+        init_pos = np.clip(init_pos, 0, 1)  # Ensure values are within [0, 1]
         init_pos = np.tile(init_pos, (pso_particles, 1))
         optimizer = ps.single.GlobalBestPSO(
             n_particles=pso_particles,
@@ -134,7 +136,7 @@ for random_seed in rd:
         cost, pos = optimizer.optimize(fitness_wrapper, iters=pso_iterations)
         selected_features = pos > 0.5
         if np.sum(selected_features) == 0:
-            selected_features = select_rate[0].numpy() > 0.5
+            selected_features = select_rate[0].detach().numpy() > 0.5
 
         # Evaluate PSO-selected features
         X_subset = data1[:, selected_features]
