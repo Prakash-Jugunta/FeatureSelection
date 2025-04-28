@@ -3,9 +3,9 @@ import numpy as np
 import torch
 
 # --- CONFIG ---
-PARENT_DIR = '.'  # where your seed subfolders (named '0','1',... etc) live
+PARENT_DIR = '.'  # where your seed subfolders (named '0', '1', etc.) are
 CLASSIFIERS = ['knn', 'svm', 'decision_tree', 'random_forest']
-ROOT_SELECT_RATE = 'select_rate.pt'  # the one saved at the script root
+ROOT_SELECT_RATE = 'select_rate.pt'  # path to select_rate.pt
 
 def find_seed_dirs(parent):
     return sorted(
@@ -22,35 +22,34 @@ def load_record(seed_dir):
 
 def aggregate(parent_dir):
     seed_dirs = find_seed_dirs(parent_dir)
-    max_accs = {clf: -np.inf for clf in CLASSIFIERS}  # Track the maximum accuracy
-    ks = {clf: [] for clf in CLASSIFIERS}
+    max_info = {clf: {'acc': -np.inf, 'k': None} for clf in CLASSIFIERS}  # Track max acc and corresponding k
 
     for sd in seed_dirs:
         rec = load_record(os.path.join(parent_dir, sd))
         for i, clf in enumerate(CLASSIFIERS):
             acc = rec[2*i]
-            k   = int(rec[2*i + 1])
-            if acc > max_accs[clf]:  # Update the max accuracy for each classifier
-                max_accs[clf] = acc
-            ks[clf].append(k)
+            k = int(rec[2*i + 1])
+            if acc > max_info[clf]['acc']:  # Update if better accuracy
+                max_info[clf]['acc'] = acc
+                max_info[clf]['k'] = k
 
-    # Return the highest accuracies
-    return max_accs, ks
-
-def consensus_k(k_list):
-    vals, counts = np.unique(k_list, return_counts=True)
-    return int(vals[np.argmax(counts)])
+    return max_info
 
 def main():
-    # 1) Aggregate
-    max_accs, ks = aggregate(PARENT_DIR)
+    # 1) Aggregate best accuracies and their corresponding k
+    max_info = aggregate(PARENT_DIR)
 
-    # 2) Best classifier
-    best_clf = max(max_accs, key=max_accs.get)
-    best_max_acc = max_accs[best_clf]
+    # 2) Print all classifiers' best accuracies and corresponding k
+    print("=== Highest Accuracies for Each Classifier ===")
+    for clf in CLASSIFIERS:
+        acc = max_info[clf]['acc']
+        k = max_info[clf]['k']
+        print(f"{clf:<15} | Highest Accuracy: {acc:.4f} | Corresponding k: {k}")
 
-    # 3) Consensus k
-    best_k = consensus_k(ks[best_clf])
+    # 3) Find overall best classifier
+    best_clf = max(max_info, key=lambda c: max_info[c]['acc'])
+    best_acc = max_info[best_clf]['acc']
+    best_k = max_info[best_clf]['k']
 
     # 4) Load select_rate.pt and extract top-k
     if not os.path.exists(ROOT_SELECT_RATE):
@@ -59,12 +58,11 @@ def main():
     sr = sr_tensor.detach().cpu().numpy()
     top_indices = np.argsort(-sr)[:best_k].tolist()
 
-    # 5) Print
-    print("=== Summary Across Seeds ===")
+    # 5) Print best classifier summary
+    print("\n=== Overall Best Classifier ===")
     print(f"Best Classifier    : {best_clf}")
-    print(f"Highest Accuracy   : {best_max_acc:.4f}")  # Display highest accuracy
-    print(f"Consensus k        : {best_k}")
-    print(f"Top-{best_k} feature indices: {top_indices}")
+    print(f"Highest Accuracy   : {best_acc:.4f}")
+    print(f"Corresponding k    : {best_k}")
 
 if __name__ == '__main__':
     main()
