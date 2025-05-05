@@ -19,7 +19,7 @@ from model import add_one_features
 from model import log
 import warnings
 import os
-
+print("started")
 def ensure_dir(directory):
     os.makedirs(directory, exist_ok=True)  # Creates the directory if it doesn't exist
 
@@ -29,7 +29,7 @@ clfl = [KNeighborsClassifier(n_neighbors=3), svm.LinearSVC(dual=False),
 
 l = ["knn", "svm", "decision_tree", "random_forest"]  # Define classifier names
 
-path = "data.csv"
+path = "DCT_orginal_Telugu_test.csv"
 lr = 0.01
 device = torch.device('cuda:0')
 epoch = 200
@@ -77,7 +77,7 @@ validation_loader = Data.DataLoader(valid_sampler, batch_size=batch_size,
 logpath = './log.txt'
 logger = log(logpath)
 
-rd = [42, 123, 7, 99, 56, 77, 88, 23, 15, 63, 101, 31, 90, 5, 28, 75, 18, 48, 200, 69, 81, 3, 111, 222, 144, 6, 36, 97, 55, 19]  # Example random seeds
+rd = [42, 123, 7, 99, 56, 77, 88, 23, 15, 63, 101, 31]  # Example random seeds
 
 for random_seed in rd:  # rd is 30 random numbers type list []
     setup_seed(random_seed)
@@ -137,7 +137,7 @@ for random_seed in rd:  # rd is 30 random numbers type list []
             else:
                 selected_f = add_more_features(torch.from_numpy(data1), selected_f, idx, int(i), int(j))
             j = i
-            print(f'{random_seed}  {int(i)}')
+            # print(f'{random_seed}  {int(i)}')
 
             # print(selected_f.shape)
             data_train, data_test, target_train, target_test = train_test_split(selected_f, label1,
@@ -153,8 +153,8 @@ for random_seed in rd:  # rd is 30 random numbers type list []
         m = max(y)
         i = y.index(m)
         prop = (i + 1) * 0.02
-        print(prop)
-        print(m)
+        # print(prop)
+        # print(m)
         features = round(n_feature * prop) - 25
         plt.scatter(x, y, label='Subsets', marker='*')
         plt.xlabel('Proportion of features')  # Number Proportion
@@ -193,7 +193,7 @@ for random_seed in rd:  # rd is 30 random numbers type list []
                 ct_1 = True
             else:
                 selected_f = add_one_features(torch.from_numpy(data1), selected_f, idx, int(i))
-            print(f'{random_seed}  {int(i)}')
+            # print(f'{random_seed}  {int(i)}')
             # print(selected_f.shape)
             data_train, data_test, target_train, target_test = train_test_split(selected_f, label1,
                                                                                 test_size=validation_split,
@@ -205,8 +205,8 @@ for random_seed in rd:  # rd is 30 random numbers type list []
             # print(score)
         m = max(y)
         Y = y.index(max(y)) + low
-        print(Y)
-        print(m)
+        # print(Y)
+        # print(m)
         record.append(m)
         record.append(Y)
         plt.scatter(x, y, label='Subsets', marker='*')
@@ -234,4 +234,4 @@ for random_seed in rd:  # rd is 30 random numbers type list []
     save_dir_record = f'./{str(random_seed)}/'
     ensure_dir(save_dir_record)  # Ensure directory exists
     np.save(f'{save_dir_record}record.npy', record)
-
+print("ended")
