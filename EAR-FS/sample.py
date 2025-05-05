@@ -29,7 +29,7 @@ clfl = [KNeighborsClassifier(n_neighbors=3), svm.LinearSVC(dual=False),
 
 l = ["knn", "svm", "decision_tree", "random_forest"]  # Define classifier names
 
-path = "data.csv"
+path = "DCT_orginal_document_classification_test.csv"
 lr = 0.01
 device = torch.device('cuda:0')
 epoch = 200
@@ -94,7 +94,7 @@ for random_seed in rd:  # rd is 30 random numbers type list []
             loss = loss_fun(output, targets)
             loss += 1e-2 / torch.sum(
                 (model.feature_selection_MLP.get_selection_rate() - 0.5) ** 2)
-            print(loss)
+            # print(loss)
             loss.backward()
             optimizer.step()  #
             predicts = output.argmax(dim=1)
@@ -137,7 +137,7 @@ for random_seed in rd:  # rd is 30 random numbers type list []
             else:
                 selected_f = add_more_features(torch.from_numpy(data1), selected_f, idx, int(i), int(j))
             j = i
-            print(f'{random_seed}  {int(i)}')
+            # print(f'{random_seed}  {int(i)}')
 
             # print(selected_f.shape)
             data_train, data_test, target_train, target_test = train_test_split(selected_f, label1,
@@ -153,8 +153,8 @@ for random_seed in rd:  # rd is 30 random numbers type list []
         m = max(y)
         i = y.index(m)
         prop = (i + 1) * 0.02
-        print(prop)
-        print(m)
+        # print(prop)
+        # print(m)
         features = round(n_feature * prop) - 25
         plt.scatter(x, y, label='Subsets', marker='*')
         plt.xlabel('Proportion of features')  # Number Proportion
@@ -193,7 +193,7 @@ for random_seed in rd:  # rd is 30 random numbers type list []
                 ct_1 = True
             else:
                 selected_f = add_one_features(torch.from_numpy(data1), selected_f, idx, int(i))
-            print(f'{random_seed}  {int(i)}')
+            # print(f'{random_seed}  {int(i)}')
             # print(selected_f.shape)
             data_train, data_test, target_train, target_test = train_test_split(selected_f, label1,
                                                                                 test_size=validation_split,
@@ -205,8 +205,8 @@ for random_seed in rd:  # rd is 30 random numbers type list []
             # print(score)
         m = max(y)
         Y = y.index(max(y)) + low
-        print(Y)
-        print(m)
+        # print(Y)
+        # print(m)
         record.append(m)
         record.append(Y)
         plt.scatter(x, y, label='Subsets', marker='*')
