@@ -29,7 +29,7 @@ clfl = [KNeighborsClassifier(n_neighbors=3), svm.LinearSVC(dual=False),
 
 l = ["knn", "svm", "decision_tree", "random_forest"]  # Define classifier names
 
-path = "DCT_orginal_document_classification_test.csv"
+path = "DCT_orginal_Tamil_test.csv"
 lr = 0.01
 device = torch.device('cuda:0')
 epoch = 200
